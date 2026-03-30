@@ -135,7 +135,7 @@ namespace ICSharpCode.XamlDesigner
 			}
 		}
 
-        public void Open(string path)
+		public void Open(string path)
         {
 			path = Path.GetFullPath(path);
 
@@ -154,7 +154,14 @@ namespace ICSharpCode.XamlDesigner
             var newDoc = new Document(path);
             Documents.Add(newDoc);
             CurrentDocument = newDoc;
-		}		
+		}
+
+		public void OpenOrUpdatePreview(string path, string xamlText)
+		{
+			path = Path.GetFullPath(path);
+			Open(path);
+			CurrentDocument?.ApplyTransientText(xamlText);
+		}
 
 		public bool Save(Document doc)
 		{

@@ -4,8 +4,10 @@ using System.Configuration;
 using System.Data;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -19,14 +21,103 @@ namespace ICSharpCode.XamlDesigner
 	{
 		public static string[] Args;
 
+		sealed class DesignerPipeMessage
+		{
+			public string command { get; set; }
+			public string path { get; set; }
+			public string xamlText { get; set; }
+		}
+
 		protected override void OnStartup(StartupEventArgs e)
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AppDomain_CurrentDomain_AssemblyResolve);
 			AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(AppDomain_CurrentDomain_UnhandledException);
 			DragDropExceptionHandler.UnhandledException += new ThreadExceptionEventHandler(DragDropExceptionHandler_UnhandledException);
 			DispatcherUnhandledException += App_DispatcherUnhandledException;
-			Args = e.Args;
+
+			// Parse --pipe <name> before exposing Args to the rest of the app.
+			var rawArgs = e.Args.ToList();
+			int pipeIdx = rawArgs.IndexOf("--pipe");
+			if (pipeIdx >= 0 && pipeIdx + 1 < rawArgs.Count)
+			{
+				string pipeName = rawArgs[pipeIdx + 1];
+				rawArgs.RemoveRange(pipeIdx, 2);
+				Thread pipeThread = new Thread(() => RunPipeServer(pipeName)) { IsBackground = true, Name = "PipeServer" };
+				pipeThread.Start();
+			}
+			Args = rawArgs.ToArray();
+
 			base.OnStartup(e);
+		}
+
+		static void RunPipeServer(string pipeName)
+		{
+			while (true)
+			{
+				try
+				{
+					using var pipe = new NamedPipeServerStream(
+						pipeName,
+						PipeDirection.In,
+						/*maxNumberOfServerInstances*/ 1,
+						PipeTransmissionMode.Byte,
+						PipeOptions.CurrentUserOnly);
+
+					pipe.WaitForConnection();
+
+					using var reader = new StreamReader(pipe);
+					string payload = reader.ReadToEnd();
+
+					var message = ParsePipeMessage(payload);
+					if (message != null)
+					{
+						Application.Current.Dispatcher.Invoke(() =>
+						{
+							HandlePipeMessage(message);
+						});
+					}
+				}
+				catch (Exception)
+				{
+					// Keep the loop alive; individual connection errors are non-fatal.
+				}
+			}
+		}
+
+		static DesignerPipeMessage ParsePipeMessage(string payload)
+		{
+			if (string.IsNullOrWhiteSpace(payload))
+				return null;
+
+			try
+			{
+				return JsonSerializer.Deserialize<DesignerPipeMessage>(payload);
+			}
+			catch
+			{
+				var legacyPath = payload.Trim();
+				return string.IsNullOrWhiteSpace(legacyPath)
+					? null
+					: new DesignerPipeMessage { command = "openFile", path = legacyPath };
+			}
+		}
+
+		static void HandlePipeMessage(DesignerPipeMessage message)
+		{
+			if (message == null || string.IsNullOrWhiteSpace(message.path))
+				return;
+
+			if (string.Equals(message.command, "applyXamlText", StringComparison.OrdinalIgnoreCase) &&
+			    !string.IsNullOrEmpty(message.xamlText))
+			{
+				Shell.Instance.OpenOrUpdatePreview(message.path, message.xamlText);
+			}
+			else
+			{
+				Shell.Instance.Open(message.path);
+			}
+
+			Application.Current.MainWindow?.Activate();
 		}
 
 		private static bool internalLoad = false;

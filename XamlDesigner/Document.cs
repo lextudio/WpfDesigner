@@ -18,6 +18,7 @@ namespace ICSharpCode.XamlDesigner
 	public class Document : INotifyPropertyChanged
 	{
 		bool isSaving;
+		bool suppressAutoSave;
 
 		public Document(string tempName, string text)
 		{
@@ -225,6 +226,25 @@ namespace ICSharpCode.XamlDesigner
 			UpdateDesign();
 		}
 
+		public void ApplyTransientText(string newText)
+		{
+			if (text == newText)
+				return;
+
+			try
+			{
+				suppressAutoSave = true;
+				text = newText;
+				IsDirty = false;
+				RaisePropertyChanged("Text");
+				UpdateDesign();
+			}
+			finally
+			{
+				suppressAutoSave = false;
+			}
+		}
+
 		void UpdateXaml()
 		{
 			var sb = new StringBuilder();
@@ -276,7 +296,7 @@ namespace ICSharpCode.XamlDesigner
 
 		void AutoSaveIfPossible()
 		{
-			if (isSaving || !IsDirty || string.IsNullOrEmpty(FilePath))
+			if (suppressAutoSave || isSaving || !IsDirty || string.IsNullOrEmpty(FilePath))
 				return;
 
 			Save();
