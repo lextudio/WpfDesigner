@@ -57,45 +57,6 @@
 	</Window.CommandBindings>
 	
 	<DockPanel>
-		
-		<Menu DockPanel.Dock="Top">
-			<MenuItem Header="File">
-				<MenuItem Command="New" />
-				<MenuItem Command="Open" />
-				<Separator />
-				<MenuItem Command="Close" />
-				<MenuItem Command="Default:MainWindow.CloseAllCommand" />
-				<Separator />
-				<MenuItem Command="Save" />
-				<MenuItem Command="SaveAs" />
-				<MenuItem Command="Default:MainWindow.SaveAllCommand" />
-				<Separator />
-				<MenuItem Header="Recent Files"
-				          ItemsSource="{Binding RecentFiles}"
-				          IsEnabled="{Binding RecentFiles.Count, Converter={StaticResource FalseWhenZero}}"
-				          Click="RecentFiles_Click"/>
-				<Separator />
-				<MenuItem Command="Default:MainWindow.ExitCommand" />
-			</MenuItem>
-			<MenuItem Header="Edit">
-				<MenuItem Command="Undo" />
-				<MenuItem Command="Redo" />
-				<Separator />
-				<MenuItem Command="Cut" />
-				<MenuItem Command="Copy" />
-				<MenuItem Command="Paste" />
-				<MenuItem Command="Delete" />
-				<MenuItem Command="SelectAll" />
-				<Separator />
-				<MenuItem Command="Default:MainWindow.RefreshCommand" />
-				<MenuItem Command="Find" />
-			</MenuItem>
-			<MenuItem Header="Test">
-				<MenuItem Command="Default:MainWindow.RunCommand" />
-				<MenuItem Command="Default:MainWindow.RenderToBitmapCommand" />
-			</MenuItem>
-		</Menu>
-
 		<avalondock:DockingManager x:Name="uxDockingManager"
                    AllowMixedOrientation="True" 
                    DocumentsSource="{Binding Documents}"

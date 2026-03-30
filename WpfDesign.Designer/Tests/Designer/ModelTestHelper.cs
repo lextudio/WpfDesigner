@@ -25,11 +25,12 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Collections.Generic;
+using System.Windows.Input;
 using ICSharpCode.WpfDesign.Adorners;
 using NUnit.Framework;
 using ICSharpCode.WpfDesign.Designer;
 using ICSharpCode.WpfDesign.Designer.Xaml;
-using Rhino.Mocks;
 
 namespace ICSharpCode.WpfDesign.Tests.Designer
 {
@@ -54,9 +55,7 @@ namespace ICSharpCode.WpfDesign.Tests.Designer
 			};*/
 			
 			// create required service mocks
-			var designPanel = MockRepository.GenerateStub<IDesignPanel>();
-			designPanel.Stub(dp => dp.Adorners).Return(new System.Collections.Generic.List<AdornerPanel>());
-			context.Services.AddService(typeof(IDesignPanel), designPanel);
+			context.Services.AddService(typeof(IDesignPanel), new TestDesignPanel(context));
 			return context;
 		}
 		
@@ -171,6 +170,71 @@ namespace ICSharpCode.WpfDesign.Tests.Designer
 		protected virtual XamlLoadSettings CreateXamlLoadSettings()
 		{
 			return new XamlLoadSettings();
+		}
+	}
+
+	sealed class TestDesignPanel : FrameworkElement, IDesignPanel
+	{
+		public TestDesignPanel(DesignContext context)
+		{
+			Context = context;
+			Adorners = new List<AdornerPanel>();
+		}
+
+		public HitTestFilterCallback CustomHitTestFilterBehavior { get; set; }
+
+		public DesignContext Context { get; }
+
+		public bool IsContentHitTestVisible { get; set; }
+
+		public bool IsAdornerLayerHitTestVisible { get; set; }
+
+		public ICollection<AdornerPanel> Adorners { get; }
+
+		public DesignPanelHitTestResult HitTest(Point mousePosition, bool testAdorners, bool testDesignSurface, HitTestType hitTestType)
+		{
+			throw new NotSupportedException();
+		}
+
+		public void HitTest(Point mousePosition, bool testAdorners, bool testDesignSurface, Predicate<DesignPanelHitTestResult> callback, HitTestType hitTestType)
+		{
+			throw new NotSupportedException();
+		}
+
+		public new event MouseButtonEventHandler MouseDown
+		{
+			add => base.MouseDown += value;
+			remove => base.MouseDown -= value;
+		}
+
+		public new event MouseButtonEventHandler MouseUp
+		{
+			add => base.MouseUp += value;
+			remove => base.MouseUp -= value;
+		}
+
+		public new event DragEventHandler DragEnter
+		{
+			add => base.DragEnter += value;
+			remove => base.DragEnter -= value;
+		}
+
+		public new event DragEventHandler DragOver
+		{
+			add => base.DragOver += value;
+			remove => base.DragOver -= value;
+		}
+
+		public new event DragEventHandler DragLeave
+		{
+			add => base.DragLeave += value;
+			remove => base.DragLeave -= value;
+		}
+
+		public new event DragEventHandler Drop
+		{
+			add => base.Drop += value;
+			remove => base.Drop -= value;
 		}
 	}
 }

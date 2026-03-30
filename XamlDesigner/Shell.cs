@@ -112,6 +112,12 @@ namespace ICSharpCode.XamlDesigner
 			}
 		}
 
+		bool CanAutoSaveAllDocuments {
+			get {
+				return Documents.All(doc => !string.IsNullOrEmpty(doc.FilePath));
+			}
+		}
+
 		static int nonameIndex = 1;
 
 		public void New()
@@ -209,6 +215,10 @@ namespace ICSharpCode.XamlDesigner
 		public bool PrepareExit()
 		{
 			if (IsSomethingDirty) {
+				if (CanAutoSaveAllDocuments) {
+					return SaveAll();
+				}
+
 				var result = MessageBox.Show("Save All?", Shell.ApplicationTitle,
 					MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 				

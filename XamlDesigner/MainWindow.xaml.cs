@@ -9,6 +9,8 @@ using Microsoft.Win32;
 using System.IO;
 using ICSharpCode.WpfDesign.Designer;
 using AvalonDock.Layout.Serialization;
+using System.Xml.Linq;
+using System.Linq;
 
 namespace ICSharpCode.XamlDesigner
 {
@@ -31,8 +33,10 @@ namespace ICSharpCode.XamlDesigner
 
 			LoadSettings();
 			ProcessPaths(App.Args);
-
-			ApplicationCommands.New.Execute(null, this);
+			if (Shell.Instance.Documents.Count == 0)
+			{
+				ApplicationCommands.New.Execute(null, this);
+			}
 		}
 
 		public static MainWindow Instance;
@@ -158,7 +162,7 @@ namespace ICSharpCode.XamlDesigner
 				if (Settings.Default.AvalonDockLayout != null)
 				{
 					XmlLayoutSerializer layoutSerializer = new XmlLayoutSerializer(uxDockingManager);
-					using (var reader = new StringReader(Settings.Default.AvalonDockLayout)) {
+					using (var reader = new StringReader(RemovePlaceholderDocuments(Settings.Default.AvalonDockLayout))) {
 						layoutSerializer.Deserialize(reader);
 					}
 				}
@@ -179,6 +183,35 @@ namespace ICSharpCode.XamlDesigner
 			}
 
 			Shell.Instance.SaveSettings();
+		}
+
+		static string RemovePlaceholderDocuments(string layoutXml)
+		{
+			if (string.IsNullOrWhiteSpace(layoutXml))
+				return layoutXml;
+
+			try
+			{
+				var document = XDocument.Parse(layoutXml);
+				var placeholders = document
+					.Descendants()
+					.Where(element =>
+						element.Name.LocalName == "LayoutDocument" &&
+						!element.HasElements &&
+						element.Attribute("ContentId") == null)
+					.ToList();
+
+				foreach (var placeholder in placeholders)
+				{
+					placeholder.Remove();
+				}
+
+				return document.ToString(SaveOptions.DisableFormatting);
+			}
+			catch
+			{
+				return layoutXml;
+			}
 		}
 	}
 }

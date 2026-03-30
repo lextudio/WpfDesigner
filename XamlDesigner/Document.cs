@@ -17,6 +17,8 @@ namespace ICSharpCode.XamlDesigner
 {
 	public class Document : INotifyPropertyChanged
 	{
+		bool isSaving;
+
 		public Document(string tempName, string text)
 		{
 			this.tempName = tempName;
@@ -44,6 +46,7 @@ namespace ICSharpCode.XamlDesigner
 					text = value;
 					IsDirty = true;
 					RaisePropertyChanged("Text");
+					AutoSaveIfPossible();
 				}
 			}
 		}
@@ -195,11 +198,19 @@ namespace ICSharpCode.XamlDesigner
 
 		public void Save()
 		{
-			if (InDesignMode) {
-				UpdateXaml();
+			try
+			{
+				isSaving = true;
+				if (InDesignMode) {
+					UpdateXaml();
+				}
+				File.WriteAllText(FilePath, Text);
+				IsDirty = false;
 			}
-			File.WriteAllText(FilePath, Text);
-			IsDirty = false;
+			finally
+			{
+				isSaving = false;
+			}
 		}
 
 		public void SaveAs(string filePath)
@@ -260,6 +271,15 @@ namespace ICSharpCode.XamlDesigner
 			if (InXamlMode) {
 				UpdateXaml();
 			}
+			AutoSaveIfPossible();
+		}
+
+		void AutoSaveIfPossible()
+		{
+			if (isSaving || !IsDirty || string.IsNullOrEmpty(FilePath))
+				return;
+
+			Save();
 		}
 
 		#region INotifyPropertyChanged Members
