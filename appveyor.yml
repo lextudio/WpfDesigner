@@ -25,7 +25,7 @@
     - ps: .\nuget\pack.ps1
 
   test_script:
-    - cmd: nunit3-console WpfDesign.Designer\Tests\bin\Release\net45\ICSharpCode.WpfDesign.Tests.dll --framework:net-4.5 --result=myresults.xml;format=AppVeyor
+    - cmd: dotnet test WpfDesign.Designer\Tests\WpfDesign.Tests.csproj --configuration Release --nologo --logger "trx;LogFileName=test-results.trx"
 
   artifacts:
     - path: 'ICSharpCode.WpfDesigner.*.nupkg'
