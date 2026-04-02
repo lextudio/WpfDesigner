@@ -1,10 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+	<OutputType>Library</OutputType>
+    <TargetFrameworks>net10.0-windows;net481</TargetFrameworks>
 		<DocumentationFile>..\..\bin\$(TargetFramework)\ICSharpCode.WpfDesign.xml</DocumentationFile>
 		<OutputPath>..\..\bin\</OutputPath>
 	<UseWPF>true</UseWPF>
+	<LangVersion>latest</LangVersion>
+	<NoWarn>$(NoWarn);CS1572;CS1573;CS1591</NoWarn>
 	<AssemblyName>ICSharpCode.WpfDesign</AssemblyName>
 	<RootNamespace>ICSharpCode.WpfDesign</RootNamespace>
 	<Version>8.1</Version>

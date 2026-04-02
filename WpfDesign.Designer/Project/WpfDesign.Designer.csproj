@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+	<OutputType>Library</OutputType>
+    <TargetFrameworks>net10.0-windows;net481</TargetFrameworks>
 	<UseWPF>true</UseWPF>
+	<LangVersion>latest</LangVersion>
+	<NoWarn>$(NoWarn);CS1572;CS1573;CS1591</NoWarn>
 	<AssemblyName>ICSharpCode.WpfDesign.Designer</AssemblyName>
 	<DocumentationFile>..\..\bin\$(TargetFramework)\ICSharpCode.WpfDesign.Designer.xml</DocumentationFile>
 	<Version>8.1</Version>
@@ -15,6 +17,9 @@
 	<ItemGroup>
     <ProjectReference Include="..\..\WpfDesign.XamlDom\Project\WpfDesign.XamlDom.csproj" />
     <ProjectReference Include="..\..\WpfDesign\Project\WpfDesign.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net481'">
+    <Reference Include="ReachFramework" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Images\*" />

@@ -1,9 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFrameworks>net10.0-windows;net481</TargetFrameworks>
 	<UseWPF>true</UseWPF>
+	<LangVersion>latest</LangVersion>
 	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<NoWarn>$(NoWarn);CS1572;CS1573;CS1591</NoWarn>
 	<ApplicationIcon />
 	<StartupObject />
   </PropertyGroup>

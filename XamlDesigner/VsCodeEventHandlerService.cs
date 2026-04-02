@@ -1,7 +1,9 @@
 using System;
 using System.ComponentModel;
-using System.Text.Json;
 using ICSharpCode.WpfDesign;
+#if !NETFRAMEWORK
+using System.Text.Json;
+#endif
 
 namespace ICSharpCode.XamlDesigner
 {
@@ -44,6 +46,15 @@ namespace ICSharpCode.XamlDesigner
 
 			// Notify VS Code to insert the stub and navigate to it.
 			string eventArgType = GetEventArgTypeFullName(eventProperty);
+#if NETFRAMEWORK
+			var payload = SimpleJsonSerialize(new System.Collections.Generic.Dictionary<string, string> {
+				["command"]      = "createEventHandler",
+				["xamlPath"]     = _xamlPath,
+				["handlerName"]  = handlerName,
+				["eventName"]    = eventProperty.Name,
+				["eventArgType"] = eventArgType,
+			});
+#else
 			var payload = JsonSerializer.Serialize(new
 			{
 				command = "createEventHandler",
@@ -52,6 +63,7 @@ namespace ICSharpCode.XamlDesigner
 				eventName = eventProperty.Name,
 				eventArgType,
 			});
+#endif
 			App.SendCallbackMessage(payload);
 		}
 
@@ -81,5 +93,21 @@ namespace ICSharpCode.XamlDesigner
 			}
 			return "System.EventArgs";
 		}
+
+#if NETFRAMEWORK
+		static string SimpleJsonSerialize(System.Collections.Generic.Dictionary<string, string> fields)
+		{
+			static string Escape(string s)
+			{
+				if (s == null) return "";
+				return s.Replace("\\", "\\\\").Replace("\"", "\\\"")
+				        .Replace("\n", "\\n").Replace("\r", "\\r").Replace("\t", "\\t");
+			}
+			var pairs = new System.Collections.Generic.List<string>();
+			foreach (var kv in fields)
+				pairs.Add($"\"{Escape(kv.Key)}\":\"{Escape(kv.Value)}\"");
+			return "{" + string.Join(",", pairs) + "}";
+		}
+#endif
 	}
 }

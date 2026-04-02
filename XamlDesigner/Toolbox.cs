@@ -45,7 +45,7 @@ namespace ICSharpCode.XamlDesigner
 		void AddAssembly(string path, ToolboxGroupKind groupKind, bool updateSettings)
 		{
 			path = Environment.ExpandEnvironmentVariables(path);
-			if (AssemblyNodes.Any(node => string.Equals(node.Path, path, StringComparison.OrdinalIgnoreCase))) {
+			if (AssemblyNodes.Any(existing => string.Equals(existing.Path, path, StringComparison.OrdinalIgnoreCase))) {
 				return;
 			}
 

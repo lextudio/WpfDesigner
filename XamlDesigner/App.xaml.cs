@@ -7,10 +7,13 @@ using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Reflection;
-using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
+#if !NETFRAMEWORK
+using System.Text.Json;
+#endif
 
 using ICSharpCode.WpfDesign.Designer;
 using ICSharpCode.XamlDesigner.Configuration;
@@ -72,7 +75,11 @@ namespace ICSharpCode.XamlDesigner
 						PipeDirection.In,
 						/*maxNumberOfServerInstances*/ 1,
 						PipeTransmissionMode.Byte,
+#if NETFRAMEWORK
+						PipeOptions.None);
+#else
 						PipeOptions.CurrentUserOnly);
+#endif
 
 					pipe.WaitForConnection();
 
@@ -102,7 +109,11 @@ namespace ICSharpCode.XamlDesigner
 
 			try
 			{
+#if NETFRAMEWORK
+				return ParsePipeMessageManual(payload);
+#else
 				return JsonSerializer.Deserialize<DesignerPipeMessage>(payload);
+#endif
 			}
 			catch
 			{
@@ -112,6 +123,24 @@ namespace ICSharpCode.XamlDesigner
 					: new DesignerPipeMessage { command = "openFile", path = legacyPath };
 			}
 		}
+
+#if NETFRAMEWORK
+		static DesignerPipeMessage ParsePipeMessageManual(string payload)
+		{
+			static string Extract(string json, string key)
+			{
+				var m = Regex.Match(json, "\"" + Regex.Escape(key) + "\"\\s*:\\s*\"((?:[^\"\\\\]|\\\\.)*)\"");
+				if (!m.Success) return null;
+				return Regex.Unescape(m.Groups[1].Value);
+			}
+			return new DesignerPipeMessage
+			{
+				command  = Extract(payload, "command"),
+				path     = Extract(payload, "path"),
+				xamlText = Extract(payload, "xamlText"),
+			};
+		}
+#endif
 
 		static void HandlePipeMessage(DesignerPipeMessage message)
 		{
@@ -213,7 +242,11 @@ namespace ICSharpCode.XamlDesigner
 				using var client = new System.IO.Pipes.NamedPipeClientStream(
 					".", CallbackPipeName,
 					System.IO.Pipes.PipeDirection.Out,
+#if NETFRAMEWORK
+					System.IO.Pipes.PipeOptions.None);
+#else
 					System.IO.Pipes.PipeOptions.CurrentUserOnly);
+#endif
 				client.Connect(2000);
 				using var writer = new System.IO.StreamWriter(client);
 				writer.Write(json);
