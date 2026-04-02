@@ -28,6 +28,9 @@ namespace ICSharpCode.XamlDesigner
 			public string xamlText { get; set; }
 		}
 
+		/// <summary>The callback pipe name passed via --callback, used to notify VS Code.</summary>
+		public static string CallbackPipeName { get; private set; }
+
 		protected override void OnStartup(StartupEventArgs e)
 		{
 			AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AppDomain_CurrentDomain_AssemblyResolve);
@@ -35,7 +38,7 @@ namespace ICSharpCode.XamlDesigner
 			DragDropExceptionHandler.UnhandledException += new ThreadExceptionEventHandler(DragDropExceptionHandler_UnhandledException);
 			DispatcherUnhandledException += App_DispatcherUnhandledException;
 
-			// Parse --pipe <name> before exposing Args to the rest of the app.
+			// Parse --pipe <name> and --callback <name> before exposing Args to the rest of the app.
 			var rawArgs = e.Args.ToList();
 			int pipeIdx = rawArgs.IndexOf("--pipe");
 			if (pipeIdx >= 0 && pipeIdx + 1 < rawArgs.Count)
@@ -45,6 +48,14 @@ namespace ICSharpCode.XamlDesigner
 				Thread pipeThread = new Thread(() => RunPipeServer(pipeName)) { IsBackground = true, Name = "PipeServer" };
 				pipeThread.Start();
 			}
+
+			int cbIdx = rawArgs.IndexOf("--callback");
+			if (cbIdx >= 0 && cbIdx + 1 < rawArgs.Count)
+			{
+				CallbackPipeName = rawArgs[cbIdx + 1];
+				rawArgs.RemoveRange(cbIdx, 2);
+			}
+
 			Args = rawArgs.ToArray();
 
 			base.OnStartup(e);
@@ -186,6 +197,31 @@ namespace ICSharpCode.XamlDesigner
 		{
 			Shell.ReportException(e.Exception);
 			e.Handled = true;
+		}
+
+		/// <summary>
+		/// Sends a JSON message to VS Code via the callback pipe (fire-and-forget).
+		/// Does nothing if no callback pipe was specified.
+		/// </summary>
+		public static void SendCallbackMessage(string json)
+		{
+			if (string.IsNullOrEmpty(CallbackPipeName))
+				return;
+
+			try
+			{
+				using var client = new System.IO.Pipes.NamedPipeClientStream(
+					".", CallbackPipeName,
+					System.IO.Pipes.PipeDirection.Out,
+					System.IO.Pipes.PipeOptions.CurrentUserOnly);
+				client.Connect(2000);
+				using var writer = new System.IO.StreamWriter(client);
+				writer.Write(json);
+			}
+			catch
+			{
+				// Best effort — VS Code may have closed the pipe server.
+			}
 		}
 
 		protected override void OnExit(ExitEventArgs e)

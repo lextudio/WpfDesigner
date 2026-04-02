@@ -274,7 +274,17 @@ namespace ICSharpCode.XamlDesigner
 					settings.DesignerAssemblies.Add(assNode.Assembly);
 				}
 				settings.TypeFinder = MyTypeFinder.Instance;
-				
+
+				// Register the VS Code event-handler service when a callback pipe is available.
+				if (!string.IsNullOrEmpty(App.CallbackPipeName))
+				{
+					string xamlPath = this.FilePath;
+					settings.CustomServiceRegisterFunctions.Add(ctx =>
+						ctx.Services.AddService(
+							typeof(ICSharpCode.WpfDesign.IEventHandlerService),
+							new VsCodeEventHandlerService(xamlPath)));
+				}
+
 				DesignSurface.LoadDesigner(xmlReader, settings);
 			}
 			if (DesignContext.RootItem != null) {

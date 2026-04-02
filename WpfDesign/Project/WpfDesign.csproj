@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
-		<DocumentationFile>..\..\bin\net10.0-windows\ICSharpCode.WpfDesign.xml</DocumentationFile>
+		<DocumentationFile>..\..\bin\$(TargetFramework)\ICSharpCode.WpfDesign.xml</DocumentationFile>
 		<OutputPath>..\..\bin\</OutputPath>
 	<UseWPF>true</UseWPF>
 	<AssemblyName>ICSharpCode.WpfDesign</AssemblyName>
