@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <!-- Allow the build script to override the TFM by passing -p:XamlDesignerDefaultTargetFramework=... -->
+    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(TargetFrameworks)' == '' and '$(XamlDesignerDefaultTargetFramework)' != ''">$(XamlDesignerDefaultTargetFramework)</TargetFramework>
+    <!-- Ensure designer builds enable Windows targeting by default when not set explicitly -->
+    <EnableWindowsTargeting Condition="'$(EnableWindowsTargeting)' == ''">true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <!-- On legacy (net481) builds, include the reference-assemblies so non-Windows hosts can restore -->
+  <ItemGroup Condition="'$(XamlDesignerDefaultTargetFramework)' == 'net481' or '$(TargetFramework)' == 'net481'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3" PrivateAssets="All" />
+  </ItemGroup>
+</Project>
