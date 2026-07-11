@@ -1,8 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="LibreWPF.Sdk/11.0.0-dev">
   <PropertyGroup>
 	<OutputType>Library</OutputType>
-    <TargetFrameworks>net10.0-windows;net481</TargetFrameworks>
-	<UseWPF>true</UseWPF>
+	<UseWPF Condition="'$(TargetFramework)' == 'net481'">true</UseWPF>
 	<LangVersion>latest</LangVersion>
 	<NoWarn>$(NoWarn);CS1572;CS1573;CS1591</NoWarn>
 	<AssemblyName>ICSharpCode.WpfDesign.Designer.ExpressionBlendInteractionAddon</AssemblyName>

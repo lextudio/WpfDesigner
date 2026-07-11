@@ -2,7 +2,8 @@
 <Project>
   <PropertyGroup>
     <!-- Allow the build script to override the TFM by passing -p:XamlDesignerDefaultTargetFramework=... -->
-    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(TargetFrameworks)' == '' and '$(XamlDesignerDefaultTargetFramework)' != ''">$(XamlDesignerDefaultTargetFramework)</TargetFramework>
+    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(XamlDesignerDefaultTargetFramework)' != ''">$(XamlDesignerDefaultTargetFramework)</TargetFramework>
+    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(XamlDesignerDefaultTargetFramework)' == ''">net10.0-windows</TargetFramework>
     <!-- Ensure designer builds enable Windows targeting by default when not set explicitly -->
     <EnableWindowsTargeting Condition="'$(EnableWindowsTargeting)' == ''">true</EnableWindowsTargeting>
   </PropertyGroup>
