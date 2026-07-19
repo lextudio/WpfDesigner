@@ -1,15 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <!-- Allow the build script to override the TFM by passing -p:XamlDesignerDefaultTargetFramework=... -->
-    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(XamlDesignerDefaultTargetFramework)' != ''">$(XamlDesignerDefaultTargetFramework)</TargetFramework>
-    <TargetFramework Condition="'$(TargetFramework)' == '' and '$(XamlDesignerDefaultTargetFramework)' == ''">net10.0-windows</TargetFramework>
+    <!--
+      Multi-target both the cross-platform WPF build (net10.0-windows, via
+      LibreWPF.Sdk) and classic .NET Framework WPF (net481) by default, so a
+      single restore/build produces both outputs instead of two single-TFM
+      passes that clobber each other's obj/ cache.
+      Pass -p:XamlDesignerDefaultTargetFrameworks=... to override (e.g. a
+      single TFM for a fast inner-loop build).
+    -->
+    <TargetFrameworks Condition="'$(TargetFramework)' == '' and '$(TargetFrameworks)' == '' and '$(XamlDesignerDefaultTargetFrameworks)' != ''">$(XamlDesignerDefaultTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(TargetFramework)' == '' and '$(TargetFrameworks)' == '' and '$(XamlDesignerDefaultTargetFrameworks)' == ''">net10.0-windows;net481</TargetFrameworks>
     <!-- Ensure designer builds enable Windows targeting by default when not set explicitly -->
     <EnableWindowsTargeting Condition="'$(EnableWindowsTargeting)' == ''">true</EnableWindowsTargeting>
+    <!--
+      LibreWPF.Sdk defaults ProGpuWpfUsePortableFrameworkReferences to true for
+      every TFM, which pulls in the net10.0-only ProGPU rendering stack (and
+      forces UseWPF=false) even for a classic net481 build. net481 has real
+      native WPF via Microsoft.NET.Sdk.WindowsDesktop, so disable the portable
+      stack there.
+    -->
+    <!--
+      LibreWPF.Sdk's own Sdk.props already defaults this to true (when empty)
+      before it imports Microsoft.NET.Sdk.WindowsDesktop's Sdk.props — which is
+      what triggers this file's auto-import — so by the time we get here the
+      property is no longer empty. Override unconditionally for net481 rather
+      than only-if-empty.
+    -->
+    <ProGpuWpfUsePortableFrameworkReferences Condition="'$(TargetFramework)' == 'net481'">false</ProGpuWpfUsePortableFrameworkReferences>
+    <!-- Same reasoning: skip ProGPU's own XAML markup/Page-item globbing on net481, letting the real WindowsDesktop WinFX pipeline own Page items instead (avoids NETSDK1022 duplicate Page items) -->
+    <ProGpuWpfUseWpfMarkup Condition="'$(TargetFramework)' == 'net481'">false</ProGpuWpfUseWpfMarkup>
   </PropertyGroup>
 
   <!-- On legacy (net481) builds, include the reference-assemblies so non-Windows hosts can restore -->
-  <ItemGroup Condition="'$(XamlDesignerDefaultTargetFramework)' == 'net481' or '$(TargetFramework)' == 'net481'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net481'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net48" Version="1.0.3" PrivateAssets="All" />
   </ItemGroup>
 </Project>
