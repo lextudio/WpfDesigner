@@ -1,6 +1,3 @@
-using System;
-using System.ComponentModel;
-using System.Threading.Tasks;
 using ICSharpCode.WpfDesign.Designer.Services;
 
 namespace ICSharpCode.XamlDesigner
@@ -21,62 +18,16 @@ namespace ICSharpCode.XamlDesigner
 			Shell.Instance.Views[Document] = this;
 
 			Document.Mode = DocumentMode.Design;
-			Document.PropertyChanged += Document_PropertyChanged;
-			uxTextEditor.TextChanged += uxTextEditor_TextChanged;
-		}
-
-		void uxTextEditor_TextChanged(object sender, EventArgs e)
-		{
-			Document.Text = uxTextEditor.Text;
-		}
-
-		async void Document_PropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName == "Text" && Document.Text != uxTextEditor.Text)
-				uxTextEditor.Text = Document.Text;
-			if (e.PropertyName == "XamlElementLineInfo")
-			{
-				try
-				{
-					await Task.Delay(70);
-					if (Document.XamlElementLineInfo != null) {
-						uxTextEditor.SelectionLength = 0;
-						uxTextEditor.SelectionStart = Document.XamlElementLineInfo.Position;
-						uxTextEditor.SelectionLength = Document.XamlElementLineInfo.Length;
-					}
-					else
-					{
-						uxTextEditor.SelectionStart = 0;
-						uxTextEditor.SelectionLength = 0;
-					}
-
-					uxTextEditor.Focus();
-				}
-				catch(Exception)
-				{ }
-			}
-				
 		}
 
 		public Document Document { get; private set; }
 
 		public void JumpToError(XamlError error)
 		{
-			Document.Mode = DocumentMode.Xaml;
-			try {
-				uxTextEditor.ScrollTo(error.Line, error.Column);
-				uxTextEditor.CaretOffset = uxTextEditor.Document.GetOffset(error.Line, error.Column);
-				
-				int n = 0;
-				char chr;
-				while ((chr = uxTextEditor.Document.GetCharAt(uxTextEditor.CaretOffset + n)) != ' ' && chr != '.' && chr != '<' && chr != '>' && chr != '"')
-				{ n++; }
-
-				uxTextEditor.SelectionLength = n;
-			}
-			catch (ArgumentException) {
-				// invalid line number
-			}
+			// No XAML source view is hosted here (AvalonEdit has been removed — see
+			// DocumentView.xaml), so there is no text position to scroll/select.
+			// Document.Mode stays Design; the corresponding design-surface element,
+			// if any, is selected independently via XamlErrorService.
 		}
 	}
 }

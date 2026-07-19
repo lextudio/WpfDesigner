@@ -49,7 +49,22 @@ namespace ICSharpCode.XamlDesigner
 				return;
 			}
 
-			var assembly = Assembly.LoadFrom(path);
+			Assembly assembly;
+			try
+			{
+				assembly = Assembly.LoadFrom(path);
+			}
+			catch (BadImageFormatException)
+			{
+				// Not a managed assembly — e.g. one of the native Win32-compat shim
+				// libraries (comdlg32.dll, user32.dll, ...) that LibreWPF's portable
+				// mode places alongside a project's own output on macOS/Linux so
+				// P/Invoke can resolve them locally. Silently skip rather than
+				// crashing designer startup, since callers enumerate every *.dll in
+				// a project's output directory without knowing which are managed.
+				return;
+			}
+
 			MyTypeFinder.Instance.RegisterAssembly(assembly);
 
 			var node = new AssemblyNode {

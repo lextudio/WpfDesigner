@@ -200,7 +200,18 @@ namespace ICSharpCode.WpfDesign.Extensions
 			
 //			IsWpfDesignerAssemblyAttribute isWpfDesignerAssembly = (IsWpfDesignerAssemblyAttribute)assemblyAttributes[0];
 //			foreach (Type type in isWpfDesignerAssembly.UsePrivateReflection ? assembly.GetTypes() : assembly.GetExportedTypes()) {
-			foreach (Type type in assembly.GetTypes()) {
+			Type[] assemblyTypes;
+			try {
+				assemblyTypes = assembly.GetTypes();
+			} catch (ReflectionTypeLoadException ex) {
+				// Some types in the assembly failed to load (e.g. a LibreWPF-ported
+				// System.Printing on a non-Windows platform not yet implementing every
+				// legacy printing type). Continue with whichever types did load instead
+				// of aborting extension registration for the whole assembly.
+				assemblyTypes = ex.Types.Where(t => t != null).ToArray()!;
+			}
+
+			foreach (Type type in assemblyTypes) {
 				object[] extensionForAttributes = type.GetCustomAttributes(typeof(ExtensionForAttribute), false);
 				if (extensionForAttributes.Length == 0)
 					continue;
