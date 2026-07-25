@@ -150,10 +150,10 @@ namespace ICSharpCode.WpfDesign.Designer.Services
 		{
 			[DllImport("user32.dll")]
 			static extern uint GetDoubleClickTime();
-			
+
 			static MouseButtonHelper()
 			{
-				k_DoubleClickSpeed = GetDoubleClickTime();
+				k_DoubleClickSpeed = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? GetDoubleClickTime() : 500;
 			}
 			
 			private static readonly uint k_DoubleClickSpeed;
