@@ -18,7 +18,6 @@
 
 using System;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace ICSharpCode.WpfDesign
 {
@@ -66,22 +65,13 @@ namespace ICSharpCode.WpfDesign
 		/// <summary>
 		/// Create a new ServiceRequiredException instance.
 		/// </summary>
+		[Obsolete(DiagnosticId = "SYSLIB0051")]
 		protected ServiceRequiredException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
 			if (info == null)
 				throw new ArgumentNullException("info");
 			this.ServiceType = (Type)info.GetValue("ServiceType", typeof(Type));
-		}
-		
-		/// <inheritdoc/>
-		[SecurityPermission(SecurityAction.Demand, SerializationFormatter=true)]
-		public override void GetObjectData(SerializationInfo info, StreamingContext context)
-		{
-			if (info == null)
-				throw new ArgumentNullException("info");
-			base.GetObjectData(info, context);
-			info.AddValue("ServiceType", this.ServiceType);
 		}
 	}
 }

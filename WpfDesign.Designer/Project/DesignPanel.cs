@@ -437,8 +437,6 @@ namespace ICSharpCode.WpfDesign.Designer
 			}
 
 			if (e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Up || e.Key == Key.Down) {
-				bool initialEvent = false;
-
 				e.Handled = true;
 
 				PlacementType placementType = Keyboard.IsKeyDown(Key.LeftCtrl) ? PlacementType.Resize : PlacementType.MoveAndIgnoreOtherContainers;

@@ -40,13 +40,13 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 		PlacementOperation operation;
 		ChangeGroup changeGroup;
 		
-		bool _isResizing;
+		bool resizeInProgress;
 		
 		/// <summary>
 		/// Gets whether this extension is resizing any element.
 		/// </summary>
 		public bool IsResizing{
-			get { return _isResizing; }
+			get { return resizeInProgress; }
 		}
 		
 		public ResizeThumbExtension()
@@ -133,7 +133,7 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 			else {
 				changeGroup = this.ExtendedItem.Context.OpenGroup("Resize", extendedItemArray);
 			}
-			_isResizing=true;
+			resizeInProgress=true;
 			ShowSizeAndHideHandles();
 		}
 
@@ -207,7 +207,7 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 				else changeGroup.Commit();
 				changeGroup = null;
 			}
-			_isResizing=false;
+			resizeInProgress=false;
 			HideSizeAndShowHandles();
 		}
 		

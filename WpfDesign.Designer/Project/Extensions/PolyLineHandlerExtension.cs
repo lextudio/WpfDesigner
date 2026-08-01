@@ -150,7 +150,7 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 			{
 				changeGroup = ExtendedItem.Context.OpenGroup("Resize", extendedItemArray);
 			}
-			_isResizing = true;
+			resizeInProgress = true;
 		}
 
 		void CommitOperation()
@@ -185,7 +185,7 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 					changeGroup.Commit();
 				changeGroup = null;
 			}
-			_isResizing = false;
+			resizeInProgress = false;
 
 			Invalidate();
 		}

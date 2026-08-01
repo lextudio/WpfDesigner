@@ -48,7 +48,7 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 		protected PlacementOperation operation;
 		protected ChangeGroup changeGroup;
 		private Canvas _surface;
-		protected bool _isResizing;
+		protected bool resizeInProgress;
 		private TextBlock _text;
 		//private DesignPanel designPanel;
 
@@ -57,7 +57,7 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 		/// </summary>
 		public bool IsResizing
 		{
-			get { return _isResizing; }
+			get { return resizeInProgress; }
 		}
 
 		/// <summary>

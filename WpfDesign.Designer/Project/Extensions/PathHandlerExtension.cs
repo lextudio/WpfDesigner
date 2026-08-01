@@ -391,7 +391,7 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 			//Move a Virtual Design Item arround... (for Snaplines, raster, ...)
 			//And Resfresh the Points after Positioning that Item!
 			operation = PlacementOperation.Start(extendedItemArray, PlacementType.MovePoint);
-			_isResizing = true;
+			resizeInProgress = true;
 		}
 
 		void CommitOrAbortKeyboardOperation()
@@ -425,7 +425,7 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 
 				this.ExtendedItem.ReapplyExtension(typeof(PathHandlerExtension));
 			}
-			_isResizing = false;
+			resizeInProgress = false;
 		}
 
 		protected void drag_Changed(DragListener drag)

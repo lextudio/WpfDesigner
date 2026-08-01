@@ -202,6 +202,7 @@ namespace ICSharpCode.WpfDesign.XamlDom
 		/// <summary>
 		/// Create a new XamlMarkupExtensionParseException instance.
 		/// </summary>
+		[Obsolete(DiagnosticId = "SYSLIB0051")]
 		protected XamlMarkupExtensionParseException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{

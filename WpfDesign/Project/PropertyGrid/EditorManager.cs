@@ -94,7 +94,6 @@ namespace ICSharpCode.WpfDesign.PropertyGrid
 						return itemsControl;
 					}
 					return (FrameworkElement)Activator.CreateInstance(defaultTextboxEditor);
-					return (FrameworkElement)Activator.CreateInstance(defaultTextboxEditor);
 				}
 			}
 			return (FrameworkElement)Activator.CreateInstance(editorType);

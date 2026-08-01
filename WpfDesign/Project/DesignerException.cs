@@ -51,6 +51,7 @@ namespace ICSharpCode.WpfDesign
 		/// <summary>
 		/// Create a new DesignerException instance.
 		/// </summary>
+		[Obsolete(DiagnosticId = "SYSLIB0051")]
 		protected DesignerException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{

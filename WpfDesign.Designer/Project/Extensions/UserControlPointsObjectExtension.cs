@@ -82,7 +82,7 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 			{
 				changeGroup = this.ExtendedItem.Context.OpenGroup("Resize", extendedItemArray);
 			}
-			_isResizing = true;
+			resizeInProgress = true;
 
 			(drag.Target as UserControlPointsObjectThumb).IsPrimarySelection = false;
 		}
@@ -167,7 +167,7 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 				changeGroup = null;
 			}
 
-			_isResizing = false;
+			resizeInProgress = false;
 			(drag.Target as UserControlPointsObjectThumb).IsPrimarySelection = true;
 			HideSizeAndShowHandles();
 		}

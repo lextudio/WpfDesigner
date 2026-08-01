@@ -51,6 +51,7 @@ namespace ICSharpCode.WpfDesign.XamlDom
 		/// <summary>
 		/// Create a new XamlLoadException instance.
 		/// </summary>
+		[Obsolete(DiagnosticId = "SYSLIB0051")]
 		protected XamlLoadException(SerializationInfo info, StreamingContext context)
 			: base(info, context)
 		{
