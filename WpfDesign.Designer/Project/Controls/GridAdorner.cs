@@ -96,7 +96,7 @@ namespace ICSharpCode.WpfDesign.Designer.Controls
 					if (column.ActualWidth < 0) continue;
 					GridLength len = (GridLength)column.GetValue(ColumnDefinition.WidthProperty);
 					
-					FormattedText text = new FormattedText(GridLengthToText(len), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("Sergio UI"), 10, Brushes.Black);
+					FormattedText text = new FormattedText(GridLengthToText(len), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("Sergio UI"), 10, Brushes.Black, VisualTreeHelper.GetDpi(this).PixelsPerDip);
 					text.TextAlignment = TextAlignment.Center;
 					drawingContext.DrawText(text, new Point(column.Offset + column.ActualWidth / 2, 0));
 				}
@@ -110,7 +110,7 @@ namespace ICSharpCode.WpfDesign.Designer.Controls
 					if (row.ActualHeight < 0) continue;
 					GridLength len = (GridLength)row.GetValue(RowDefinition.HeightProperty);
 					
-					FormattedText text = new FormattedText(GridLengthToText(len), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("Sergio UI"), 10, Brushes.Black);
+					FormattedText text = new FormattedText(GridLengthToText(len), CultureInfo.CurrentCulture, FlowDirection.LeftToRight, new Typeface("Sergio UI"), 10, Brushes.Black, VisualTreeHelper.GetDpi(this).PixelsPerDip);
 					text.TextAlignment = TextAlignment.Center;
 					drawingContext.PushTransform(new RotateTransform(-90));
 					drawingContext.DrawText(text, new Point((row.Offset + row.ActualHeight / 2)*-1, 0));
