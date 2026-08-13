@@ -161,6 +161,23 @@ namespace ICSharpCode.WpfDesign.Designer.Services
 		{
 			try {
 				if (moveLogic != null) {
+					// Settle the item at the point the pointer was actually released at, before
+					// committing. The item is created wherever the drag FIRST landed on a valid
+					// container (designPanel_DragOver's moveLogic == null branch), and only starts
+					// following the pointer once the freshly-created element reports IsLoaded and a
+					// further DragOver arrives after that - Start(createPoint) and Move(p) are two
+					// separate events. A short or fast drag simply doesn't deliver enough of them,
+					// so the item kept whatever position it was given at creation time: for a
+					// StackPanel that is its child index, which is why a control dropped at the top
+					// of a stack still ended up appended at the bottom. Replaying the final point
+					// here makes the release point authoritative regardless of drag length.
+					var dropPoint = e.GetPosition((IDesignPanel)sender);
+					if (moveLogic.ClickedOn.View is FrameworkElement view && view.IsLoaded) {
+						if (moveLogic.Operation == null)
+							moveLogic.Start(createPoint);
+						moveLogic.Move(dropPoint);
+					}
+
 					moveLogic.Stop();
 					if (moveLogic.ClickedOn.Services.Tool.CurrentTool is CreateComponentTool) {
 						moveLogic.ClickedOn.Services.Tool.CurrentTool = moveLogic.ClickedOn.Services.Tool.PointerTool;
