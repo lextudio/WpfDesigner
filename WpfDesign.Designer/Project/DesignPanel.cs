@@ -209,7 +209,25 @@ namespace ICSharpCode.WpfDesign.Designer
 			this.Focusable = true;
 			//this.Margin = new Thickness(16);
 			DesignerProperties.SetIsInDesignMode(this, true);
-			
+
+			// DesignPanel is the one genuine common ancestor of all three branches a hit test can
+			// land in: the real content (GetVisualChild index 0), _eatAllHitTestRequests (index 1),
+			// and _adornerLayer (index 2, topmost - selection/move/resize adorners live here). The
+			// portable (non-Windows) drag-drop reimplementation resolves its target by walking up
+			// from the raw hit for an explicitly AllowDrop==true ancestor (approximating Windows'
+			// per-HWND OLE registration, since AllowDrop itself is an *inherited* property and an
+			// inherited value doesn't count as a registration - see PortableDragDropOperation
+			// .ResolveDropTarget's own comment). _eatAllHitTestRequests being AllowDrop==true does
+			// NOT help a hit that lands on an adorner: adorners and _eatAllHitTestRequests are
+			// siblings under DesignPanel, not ancestor/descendant, so that walk never reaches it -
+			// it falls through PAST DesignPanel entirely and matches whatever outer AllowDrop==true
+			// window it eventually reaches instead (e.g. the IDE's own top-level file-drop target),
+			// which has no idea what to do with an in-app toolbox drag. Marking DesignPanel itself
+			// AllowDrop==true - true regardless of which of the three branches was actually hit -
+			// is what CreateComponentTool.Activate already assumes: it subscribes DragOver/Drop
+			// directly on this DesignPanel instance, not on any specific child.
+			this.AllowDrop = true;
+
 			_eatAllHitTestRequests = new EatAllHitTestRequests();
 			_eatAllHitTestRequests.MouseDown += delegate {
 				// ensure the design panel has focus while the user is interacting with it
