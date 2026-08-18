@@ -37,10 +37,18 @@ namespace ICSharpCode.WpfDesign.Designer.Extensions
 		{
 			base.BeginPlacement(operation);
 			
-			DesignPanel designPanel = ExtendedItem.Services.DesignPanel as DesignPanel;
+			// Use the non-throwing GetService<IDesignPanel>() rather than the Services.DesignPanel
+			// property, which is GetRequiredService and throws when no design panel is registered.
+			// This method already treats a missing/foreign panel as "use the default raster" (the
+			// `as DesignPanel` + null check below), and CreateSurface() immediately after guards on
+			// GetService<IDesignPanel>() != null for exactly that reason - this line was the only
+			// one in the placement-behavior pair that could still throw, which made every
+			// PlacementOperation (move/resize) impossible in a headless host that has a full
+			// design context but no design panel (OpenDevelop's out-of-process WPF design host).
+			DesignPanel designPanel = ExtendedItem.Services.GetService<IDesignPanel>() as DesignPanel;
 			if (designPanel != null)
 				raster = designPanel.RasterWidth;
-			
+
 			CreateSurface(operation);
 		}
 
