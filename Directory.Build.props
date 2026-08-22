@@ -9,8 +9,11 @@
       Pass -p:XamlDesignerDefaultTargetFrameworks=... to override (e.g. a
       single TFM for a fast inner-loop build).
     -->
-    <TargetFrameworks Condition="'$(TargetFramework)' == '' and '$(TargetFrameworks)' == '' and '$(XamlDesignerDefaultTargetFrameworks)' != ''">$(XamlDesignerDefaultTargetFrameworks)</TargetFrameworks>
-    <TargetFrameworks Condition="'$(TargetFramework)' == '' and '$(TargetFrameworks)' == '' and '$(XamlDesignerDefaultTargetFrameworks)' == ''">net10.0-windows;net481</TargetFrameworks>
+    <!-- On macOS there are no net481 reference assemblies and ObsoleteAttribute.DiagnosticId
+         is missing, so multi-targeting fails. Always use net10.0-windows only there. -->
+    <TargetFrameworks Condition="'$(OS)' == 'Unix'">net10.0-windows</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Unix' and '$(TargetFramework)' == '' and '$(TargetFrameworks)' == '' and '$(XamlDesignerDefaultTargetFrameworks)' != ''">$(XamlDesignerDefaultTargetFrameworks)</TargetFrameworks>
+    <TargetFrameworks Condition="'$(OS)' != 'Unix' and '$(TargetFramework)' == '' and '$(TargetFrameworks)' == '' and '$(XamlDesignerDefaultTargetFrameworks)' == ''">net10.0-windows;net481</TargetFrameworks>
     <!-- Ensure designer builds enable Windows targeting by default when not set explicitly -->
     <EnableWindowsTargeting Condition="'$(EnableWindowsTargeting)' == ''">true</EnableWindowsTargeting>
     <!--

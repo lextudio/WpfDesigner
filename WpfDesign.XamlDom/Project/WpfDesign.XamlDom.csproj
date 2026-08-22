@@ -1,9 +1,6 @@
 ﻿<Project Sdk="LibreWPF.Sdk">
   <PropertyGroup>
-	<OutputType>Library</OutputType>
-		<DocumentationFile>..\..\bin\$(TargetFramework)\ICSharpCode.WpfDesign.XamlDom.xml</DocumentationFile>
-		<OutputPath>..\..\bin\</OutputPath>
-	<UseWPF Condition="'$(TargetFramework)' == 'net481'">true</UseWPF>
+  	<OutputType>Library</OutputType>
 	<LangVersion>latest</LangVersion>
 	<NoWarn>$(NoWarn);CS1572;CS1573;CS1591</NoWarn>
 	<AssemblyName>ICSharpCode.WpfDesign.XamlDom</AssemblyName>
