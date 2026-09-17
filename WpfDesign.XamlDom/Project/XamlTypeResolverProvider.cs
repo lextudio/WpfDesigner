@@ -122,6 +122,12 @@ namespace ICSharpCode.WpfDesign.XamlDom
 		
 		public object FindResource(object key)
 		{
+			// A null key reaches here when a {StaticResource} markup extension was built without
+			// its key (see below). Every ResourceDictionary indexer throws ArgumentNullException
+			// on a null key, and that exception propagates out through WPF's style application,
+			// which abandons the whole Style - leaving the element unstyled with no diagnostic.
+			if (key == null)
+				return null;
 			XamlObject obj = containingObject;
 			while (obj != null) {
 				FrameworkElement el = obj.Instance as FrameworkElement;
@@ -130,7 +136,48 @@ namespace ICSharpCode.WpfDesign.XamlDom
 					if (val != null)
 						return val;
 				}
+				// A ResourceDictionary that is still BEING BUILT is not reachable through any
+				// element's Resources yet - the owning element may not even be instantiated. Real
+				// WPF resolves a sibling reference inside a dictionary (most commonly
+				// BasedOn="{StaticResource ...}") against the dictionary under construction; this
+				// walk has to do the same, or every derived Style silently loses its BasedOn.
+				//
+				// That is the whole WPFGallery caption-button bug: TitleBarDefaultButtonStyle is
+				// BasedOn BorderlessButtonStyle, the lookup ran while Window.Resources was still
+				// being populated and returned null, so the derived style kept only its own two
+				// setters and lost MinWidth/Background/Template. The buttons then collapsed to the
+				// bare glyph width (14px) and painted nothing.
+				var dictionary = obj.Instance as ResourceDictionary;
+				if (dictionary != null) {
+					object dictionaryValue = dictionary[key];
+					if (dictionaryValue != null)
+						return dictionaryValue;
+				}
 				obj = obj.ParentObject;
+			}
+			// The walk above only sees each element's OWN dictionary, so a {StaticResource} naming
+			// an app/theme key resolved to null - and a null value inside a Setter makes the WHOLE
+			// Style fail to apply, silently. (WPFGallery's MainWindow caption buttons lost their
+			// MinWidth/Background that way and collapsed to the bare glyph width, rendering as
+			// empty boxes, while a sibling button carrying explicit Width/Height looked fine.)
+			// Mirror the last step of WPF's own lookup order: the application scope, which is
+			// where WpfSurfaceHostService.InstallApplicationResources puts the designed project's
+			// App.xaml dictionary.
+			//
+			// Deliberately ONLY after the element walk, and never FrameworkElement.TryFindResource
+			// inside it: that call walks its own tree and into the application on every level, and
+			// doing so here made every Style in the document fail to apply (measured: styles that
+			// resolved fine before started collapsing too), because a design-time element is not
+			// in a normal tree and the host application's own theme defines many of the same keys.
+			try {
+				var app = System.Windows.Application.Current;
+				if (app != null) {
+					var appResources = app.Resources;
+					if (appResources != null)
+						return appResources[key];
+				}
+			} catch (Exception) {
+				// Resource lookup must never take the parse down; a miss is reported as null.
 			}
 			return null;
 		}
