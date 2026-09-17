@@ -176,6 +176,35 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
+	<!--
+		The emulated window chrome's own caption buttons. They need an EXPLICIT style because the
+		host installs the DESIGNED APP's App.xaml (theme dictionaries included) into
+		Application.Current.Resources, so that app's implicit Button style otherwise applies to the
+		designer's own chrome too. With WPF-Samples' WPFGallery that is the Fluent theme, whose
+		Button padding (11,5,11,6) leaves a 25x17 caption button no content room at all: the glyphs
+		came out clipped to a sliver, a dot and the bottom half of an X. An explicit style beats an
+		implicit one, which pins the chrome regardless of what the designed app's theme does.
+	-->
+	<Style x:Key="WindowCloneCaptionButtonStyle" TargetType="{x:Type Button}">
+		<Setter Property="Padding" Value="0" />
+		<Setter Property="MinWidth" Value="0" />
+		<Setter Property="MinHeight" Value="0" />
+		<Setter Property="FocusVisualStyle" Value="{x:Null}" />
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+		<Setter Property="UseLayoutRounding" Value="True" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Button}">
+					<Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" SnapsToDevicePixels="True">
+						<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+					</Border>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
 	<Style TargetType="{x:Type Controls:WindowClone}">
 		<Setter Property="Width" Value="640" />
 		<Setter Property="Height" Value="480" />
@@ -187,9 +216,26 @@
 							<DockPanel Height="26" DockPanel.Dock="Top">
 								<Image Width="16" Height="16" Margin="1,0,0,0" Source="/ICSharpCode.WpfDesign.Designer;component/Images/Icons.32x32.EmptyProjectIcon.png" Visibility="{Binding Path=(Window.Icon), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:CollapsedWhenNotNull.Instance}}" />
 								<Image Width="16" Height="16" Margin="1,0,0,0" Source="{TemplateBinding Window.Icon}" Visibility="{Binding Path=(Window.Icon), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:CollapsedWhenZero.Instance}}" />
-								<Button Content="r" FontFamily="Marlett" Name="CloseButton" VerticalAlignment="Top" Width="43" Height="17" DockPanel.Dock="Right" />
-								<Button Content="1" FontFamily="Marlett" Name="MinimizeButton" VerticalAlignment="Top" Width="25" Height="17" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}" />
-								<Button Content="0" FontFamily="Marlett" Name="MaximiseButton" VerticalAlignment="Top" Width="25" Height="17" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}" />
+								<!-- Caption glyphs are drawn as SHAPES, not font characters, deliberately.
+								     This template previously used the Marlett "r"/"1"/"0" characters, which
+								     rendered as the literal letter and digits in the design host, so the
+								     emulated chrome showed broken marks instead of close/minimise/maximise.
+								     A glyph font is the wrong fix here: Marlett, Segoe MDL2 Assets and
+								     Segoe Fluent Icons are all Windows-only, and OpenDevelop's designer
+								     also runs on macOS and Linux through LibreWPF, where any of them would
+								     tofu exactly the same way. Three primitives need no font on any
+								     platform and cannot regress that way. -->
+								<Button Name="CloseButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Top" Width="43" Height="17" DockPanel.Dock="Right">
+									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,0.5 L 9.5,9.5 M 9.5,0.5 L 0.5,9.5" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" SnapsToDevicePixels="True" />
+								</Button>
+								<!-- Declared after CloseButton and docked Right, so left-to-right these read
+								     minimise, maximise, close - the Windows caption order. -->
+								<Button Name="MinimizeButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Top" Width="25" Height="17" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}">
+									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,0.5 H 9.5 V 9.5 H 0.5 Z" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" SnapsToDevicePixels="True" />
+								</Button>
+								<Button Name="MaximizeButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Top" Width="25" Height="17" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}">
+									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,5.5 H 9.5" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" SnapsToDevicePixels="True" />
+								</Button>
 								<Label Margin="4,0,0,0" Content="{TemplateBinding Window.Title}" />
 							</DockPanel>
 							<Border Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
