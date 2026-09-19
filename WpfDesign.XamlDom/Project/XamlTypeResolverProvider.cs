@@ -122,10 +122,10 @@ namespace ICSharpCode.WpfDesign.XamlDom
 		
 		public object FindResource(object key)
 		{
-			// A null key reaches here when a {StaticResource} markup extension was built without
-			// its key (see below). Every ResourceDictionary indexer throws ArgumentNullException
-			// on a null key, and that exception propagates out through WPF's style application,
-			// which abandons the whole Style - leaving the element unstyled with no diagnostic.
+			// A null key reaches here when a markup extension was built without one. Every
+			// ResourceDictionary indexer throws ArgumentNullException on a null key, and such an
+			// exception escapes through WPF's style application, which then abandons the whole
+			// Style and leaves the element unstyled with no diagnostic anywhere. A miss is a miss.
 			if (key == null)
 				return null;
 			XamlObject obj = containingObject;

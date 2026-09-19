@@ -228,12 +228,14 @@
 								<Button Name="CloseButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Top" Width="43" Height="17" DockPanel.Dock="Right">
 									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,0.5 L 9.5,9.5 M 9.5,0.5 L 0.5,9.5" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" SnapsToDevicePixels="True" />
 								</Button>
-								<!-- Declared after CloseButton and docked Right, so left-to-right these read
-								     minimise, maximise, close - the Windows caption order. -->
-								<Button Name="MinimizeButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Top" Width="25" Height="17" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}">
+								<!-- DockPanel.Dock="Right" places these right-to-left in DECLARATION order, so
+								     declaring close, then maximize, then minimize renders them left-to-right
+								     as minimize, maximize, close - the Windows caption order. Each glyph
+								     stays paired with the button that is named for it. -->
+								<Button Name="MaximizeButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Top" Width="25" Height="17" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}">
 									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,0.5 H 9.5 V 9.5 H 0.5 Z" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" SnapsToDevicePixels="True" />
 								</Button>
-								<Button Name="MaximizeButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Top" Width="25" Height="17" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}">
+								<Button Name="MinimizeButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Top" Width="25" Height="17" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}">
 									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,5.5 H 9.5" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" SnapsToDevicePixels="True" />
 								</Button>
 								<Label Margin="4,0,0,0" Content="{TemplateBinding Window.Title}" />
