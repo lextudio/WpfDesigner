@@ -770,6 +770,13 @@ namespace ICSharpCode.WpfDesign.XamlDom
 			} else if (targetProperty.ReturnType == typeof(ImageSource)) {
 				var uri = scope.OwnerDocument.TypeFinder.ConvertUriToLocalUri(new Uri(valueText, UriKind.RelativeOrAbsolute));
 				return targetProperty.TypeConverter.ConvertFromString(scope.OwnerDocument.GetTypeDescriptorContext(scope), CultureInfo.InvariantCulture, uri.ToString());
+			} else if (targetProperty.ReturnType != typeof(string)
+			           && valueText.StartsWith("pack://", StringComparison.OrdinalIgnoreCase)
+			           && Uri.TryCreate(valueText, UriKind.Absolute, out var packUri)) {
+				// Other converters that take a pack URI (FontFamily's "pack://...#Family", a
+				// BitmapImage's UriSource written as text) get the same host mapping, applied to the
+				// converted value only so the document text keeps what the user wrote.
+				valueText = scope.OwnerDocument.TypeFinder.ConvertUriToLocalUri(packUri).OriginalString;
 			}
 
 			return targetProperty.TypeConverter.ConvertFromString(
