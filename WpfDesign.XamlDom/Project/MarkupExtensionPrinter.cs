@@ -107,18 +107,22 @@ namespace ICSharpCode.WpfDesign.XamlDom
 			var textValue = value as XamlTextValue;
 			if (textValue != null) {
 				string text = textValue.Text;
-				bool containsSpace = text.Contains(' ');
+				// Quote any value the tokenizer would otherwise split or misread: a comma or '=' ends
+				// an unquoted argument (StringFormat={0:#,0}, ConverterParameter=a,b) and a leading
+				// quote starts a quoted one.
+				bool needsQuotes = text.IndexOfAny(new[] { ' ', ',', '=', '\'', '"' }) >= 0;
 				
-				if(containsSpace) {
+				if(needsQuotes) {
 					sb.Append('\'');
 				}
 				
 				// Escape braces for every text value, not only string-typed properties: an object-typed
 				// literal such as TargetNullValue="{0}" would otherwise be re-read as a nested extension,
 				// and a literal "{}{0}" would lose its leading "{}" as if it were an escape.
-				sb.Append(text.Replace("\\", "\\\\").Replace("{", "\\{").Replace("}", "\\}"));
+				var escaped = text.Replace("\\", "\\\\").Replace("{", "\\{").Replace("}", "\\}");
+				sb.Append(needsQuotes ? escaped.Replace("'", "\\'") : escaped);
 				
-				if(containsSpace) {
+				if(needsQuotes) {
 					sb.Append('\'');
 				}
 			} else if (value is XamlObject) {

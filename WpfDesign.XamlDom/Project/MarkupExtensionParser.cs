@@ -96,19 +96,19 @@ namespace ICSharpCode.WpfDesign.XamlDom
 			if (text[pos] == '"' || text[pos] == '\'') {
 				char quote = text[pos++];
 				CheckNotEOF();
-				int lastBackslashPos = -1;
-				while (!(text[pos] == quote && text[pos-1] != '\\')) {
-					int current = pos;
+				// A backslash escapes the next character, whatever it is. Tracking escapes as we go
+				// (rather than testing only the preceding character) lets a value end in an escaped
+				// backslash, e.g. 'a\\' followed by the closing quote.
+				while (text[pos] != quote) {
 					char c = text[pos++];
-					//check if string is \\ and that the last backslash is not the previously saved char, ie that \\\\ does not become \\\ but just \\
-					bool isEscapedBackslash = string.Concat(text[current-1],c)=="\\\\" && current-1 != lastBackslashPos;
-					if (c != '\\' || isEscapedBackslash){
-						if (b.Length == 0 && c == '{' && text[current-1] == '\\')
+					if (c == '\\') {
+						CheckNotEOF();
+						c = text[pos++];
+						// An escaped leading brace is literal text, not a nested markup extension.
+						if (b.Length == 0 && c == '{')
 							b.Append("{}");
-						b.Append(c);
-						if(isEscapedBackslash)
-							lastBackslashPos = current;
 					}
+					b.Append(c);
 					CheckNotEOF();
 				}
 				pos++; // consume closing quote
