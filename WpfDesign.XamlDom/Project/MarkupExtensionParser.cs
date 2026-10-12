@@ -103,6 +103,8 @@ namespace ICSharpCode.WpfDesign.XamlDom
 					//check if string is \\ and that the last backslash is not the previously saved char, ie that \\\\ does not become \\\ but just \\
 					bool isEscapedBackslash = string.Concat(text[current-1],c)=="\\\\" && current-1 != lastBackslashPos;
 					if (c != '\\' || isEscapedBackslash){
+						if (b.Length == 0 && c == '{' && text[current-1] == '\\')
+							b.Append("{}");
 						b.Append(c);
 						if(isEscapedBackslash)
 							lastBackslashPos = current;
@@ -119,6 +121,10 @@ namespace ICSharpCode.WpfDesign.XamlDom
 						case '\\':
 							pos++;
 							CheckNotEOF();
+							// An escaped leading brace is literal text, not a nested markup
+							// extension; keep that fact through the "{}" attribute escape.
+							if (b.Length == 0 && text[pos] == '{')
+								b.Append("{}");
 							b.Append(text[pos++]);
 							break;
 						case '{':
@@ -312,7 +318,12 @@ namespace ICSharpCode.WpfDesign.XamlDom
 				var ctorParams = new object[ctorParamsInfo.Length];
 				for (int i = 0; i < ctorParams.Length; i++) {
 					var paramType = ctorParamsInfo[i].ParameterType;
-					ctorParams[i] = XamlParser.CreateObjectFromAttributeText(positionalArgs[i], paramType, parent);
+					// A converter receives the literal text, so drop the "{}" escape that marks a
+					// leading brace as literal (the property-mapped path strips it in XamlTextValue).
+					var argText = positionalArgs[i];
+					if (argText.StartsWith("{}", StringComparison.Ordinal))
+						argText = argText.Substring(2);
+					ctorParams[i] = XamlParser.CreateObjectFromAttributeText(argText, paramType, parent);
 				}
 				instance = ctor.Invoke(ctorParams);
 				//TODO

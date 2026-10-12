@@ -48,9 +48,20 @@ namespace ICSharpCode.WpfDesign.XamlDom
 		internal XamlTextValue(XamlDocument document, string textValue)
 		{
 			this.document = document;
-			if (textValue.StartsWith("{"))
+			// textValue is stored in attribute form: a literal starting with '{' carries the "{}"
+			// escape. This constructor takes a literal (e.g. converter output), so always escape it.
+			if (textValue.StartsWith("{", StringComparison.Ordinal))
 				textValue = "{}" + textValue;
 			this.textValue = textValue;
+		}
+
+		/// <summary>Creates a value from text already in attribute form (a parsed markup-extension
+		/// argument), whose "{}" prefix is an escape rather than literal content.</summary>
+		internal static XamlTextValue FromAttributeText(XamlDocument document, string attributeText)
+		{
+			var value = new XamlTextValue(document, string.Empty);
+			value.textValue = attributeText;
+			return value;
 		}
 		
 		internal XamlTextValue(XamlDocument document, XmlText textNode, XmlSpace xmlSpace)
@@ -78,7 +89,7 @@ namespace ICSharpCode.WpfDesign.XamlDom
 					else
 						return attribute.Value;
 				} else if (textValue != null)
-					return textValue;
+					return textValue.StartsWith("{}", StringComparison.Ordinal) ? textValue.Substring(2) : textValue;
 				else if (cDataSection != null)
 					return cDataSection.Value;
 				else

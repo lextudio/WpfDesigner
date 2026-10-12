@@ -672,7 +672,7 @@ namespace ICSharpCode.WpfDesign.XamlDom
 				if (real)
 					value = new XamlTextValue(obj.OwnerDocument, attribute);
 				else
-					value = new XamlTextValue(obj.OwnerDocument, valueText);
+					value = XamlTextValue.FromAttributeText(obj.OwnerDocument, valueText);
 			}
 
 			var property = new XamlProperty(obj, propertyInfo, value);

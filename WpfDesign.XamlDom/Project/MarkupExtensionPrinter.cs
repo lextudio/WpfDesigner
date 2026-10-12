@@ -113,10 +113,10 @@ namespace ICSharpCode.WpfDesign.XamlDom
 					sb.Append('\'');
 				}
 				
-				if (isStringProperty)
-					sb.Append(text.Replace("\\", "\\\\").Replace("{", "\\{").Replace("}", "\\}"));
-				else
-					sb.Append(text.Replace("\\", "\\\\"));
+				// Escape braces for every text value, not only string-typed properties: an object-typed
+				// literal such as TargetNullValue="{0}" would otherwise be re-read as a nested extension,
+				// and a literal "{}{0}" would lose its leading "{}" as if it were an escape.
+				sb.Append(text.Replace("\\", "\\\\").Replace("{", "\\{").Replace("}", "\\}"));
 				
 				if(containsSpace) {
 					sb.Append('\'');
