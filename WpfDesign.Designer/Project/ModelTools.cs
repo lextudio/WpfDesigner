@@ -393,13 +393,18 @@ namespace ICSharpCode.WpfDesign.Designer
 			if (placement == null)
 				return;
 
+			// Measure the container in ITS parent's placement. The children's operation below is the
+			// container's own placement, where the container is always at (0,0): measuring it there
+			// dropped the container's offset, so unwrapped children jumped to the parent's origin.
+			var containerOperation = PlacementOperation.Start(new[] { container }, PlacementType.Move);
+			var containerPos = GetItemPos(containerOperation, container);
+			containerOperation.Abort();
+
 			var operation = PlacementOperation.Start(collection.ToList(), PlacementType.Move);
 
 			List<ItemPos> itemList = new List<ItemPos>();
 
 			int? firstIndex = null;
-
-			var containerPos = GetItemPos(operation, container);
 
 			foreach (var item in collection)
 			{
@@ -469,7 +474,7 @@ namespace ICSharpCode.WpfDesign.Designer
 					else
 					{
 						item.DesignItem.Properties.GetProperty(FrameworkElement.HorizontalAlignmentProperty).SetValue(HorizontalAlignment.Left);
-						thickness.Left = item.Xmin;
+						thickness.Left = item.Xmin + containerPos.Xmin;
 					}
 
 					if (item.VerticalAlignment == VerticalAlignment.Bottom)
@@ -480,7 +485,7 @@ namespace ICSharpCode.WpfDesign.Designer
 					else
 					{
 						item.DesignItem.Properties.GetProperty(FrameworkElement.VerticalAlignmentProperty).SetValue(VerticalAlignment.Top);
-						thickness.Top = item.Ymin;
+						thickness.Top = item.Ymin + containerPos.Ymin;
 					}
 
 					item.DesignItem.Properties.GetProperty(FrameworkElement.MarginProperty).SetValue(thickness);
