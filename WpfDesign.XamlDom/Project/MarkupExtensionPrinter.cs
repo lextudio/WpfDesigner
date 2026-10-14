@@ -74,8 +74,19 @@ namespace ICSharpCode.WpfDesign.XamlDom
 					first = false;
 				}
 			}
-			else if (obj.ElementType == typeof(StaticResourceExtension)){
+			else if (obj.ElementType == typeof(StaticResourceExtension) || obj.ElementType == typeof(DynamicResourceExtension)){
 				var p=obj.Properties.FirstOrDefault(x=>x.PropertyName=="ResourceKey");
+				if (p!=null && p.IsSet) {
+					sb.Append(" ");
+					AppendPropertyValue(sb, p.PropertyValue, false);
+					properties.Remove(p);
+					first = false;
+				}
+			}
+			// {x:Static Member} is always written with its member positional, as XAML authors and
+			// Visual Studio do; "Member=" is valid but reads like a different extension.
+			else if (obj.ElementType == typeof(StaticExtension)){
+				var p=obj.Properties.FirstOrDefault(x=>x.PropertyName=="Member");
 				if (p!=null && p.IsSet) {
 					sb.Append(" ");
 					AppendPropertyValue(sb, p.PropertyValue, false);

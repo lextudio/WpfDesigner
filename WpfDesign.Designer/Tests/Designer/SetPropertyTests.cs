@@ -53,7 +53,7 @@ namespace ICSharpCode.WpfDesign.Tests.Designer
 			DesignItem button = CreateCanvasContext("<Button Width='100' Height='200'/>");
 			button.Properties.GetProperty("Content").SetValue(new StaticExtension());
 			button.Properties.GetProperty("Content").Value.Properties["Member"].SetValue("Button.ClickModeProperty");
-			AssertCanvasDesignerOutput("<Button Width=\"100\" Height=\"200\" Content=\"{x:Static Member=Button.ClickModeProperty}\" />", button.Context);
+			AssertCanvasDesignerOutput("<Button Width=\"100\" Height=\"200\" Content=\"{x:Static Button.ClickModeProperty}\" />", button.Context);
 		}
 		
 		[Test]
