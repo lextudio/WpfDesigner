@@ -93,6 +93,18 @@ namespace ICSharpCode.WpfDesign.XamlDom
 		Dictionary<AssemblyNamespaceMapping, List<string>> reverseDictList = new Dictionary<AssemblyNamespaceMapping, List<string>>();
 		
 		/// <summary>
+		/// The XAML language's built-in types (x:Double, x:String, ...): they live in the XAML namespace
+		/// but are CLR primitives that no XmlnsDefinition maps, so they are resolved here.
+		/// </summary>
+		internal static readonly Dictionary<string, Type> XamlLanguagePrimitives = new Dictionary<string, Type> {
+			{ "Boolean", typeof(bool) }, { "Byte", typeof(byte) }, { "Char", typeof(char) },
+			{ "Decimal", typeof(decimal) }, { "Double", typeof(double) }, { "Int16", typeof(short) },
+			{ "Int32", typeof(int) }, { "Int64", typeof(long) }, { "Object", typeof(object) },
+			{ "Single", typeof(float) }, { "String", typeof(string) }, { "TimeSpan", typeof(TimeSpan) },
+			{ "Uri", typeof(Uri) }
+		};
+
+		/// <summary>
 		/// Gets a type referenced in XAML.
 		/// </summary>
 		/// <param name="xmlNamespace">The XML namespace to use to look up the type.
@@ -107,6 +119,8 @@ namespace ICSharpCode.WpfDesign.XamlDom
 				throw new ArgumentNullException("xmlNamespace");
 			if (localName == null)
 				throw new ArgumentNullException("localName");
+			if (xmlNamespace == XamlConstants.XamlNamespace && XamlLanguagePrimitives.TryGetValue(localName, out var primitive))
+				return primitive;
 			XamlNamespace ns;
 			if (!namespaces.TryGetValue(xmlNamespace, out ns)) {
 				if (xmlNamespace.StartsWith("clr-namespace:", StringComparison.Ordinal)) {

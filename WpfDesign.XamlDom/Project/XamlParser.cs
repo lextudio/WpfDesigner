@@ -374,7 +374,10 @@ namespace ICSharpCode.WpfDesign.XamlDom
 					currentParsedNode = childNode;
 					XmlElement childElement = childNode as XmlElement;
 					if (childElement != null) {
-						if (childElement.NamespaceURI == XamlConstants.XamlNamespace)
+						// x:Code, x:XData and the like are not objects; x:Double, x:String and the
+						// other XAML language primitives are (typically resources).
+						if (childElement.NamespaceURI == XamlConstants.XamlNamespace
+						    && !XamlTypeFinder.XamlLanguagePrimitives.ContainsKey(childElement.LocalName))
 							continue;
 						
 						if (ObjectChildElementIsPropertyElement(childElement)) {
