@@ -85,7 +85,7 @@ namespace ICSharpCode.WpfDesign.XamlDom
 				}
 			} else if (collectionInstance is IDictionary) {
 				object val = newElement.GetValueFor(null);
-				object key = newElement is XamlObject ? ((XamlObject)newElement).GetXamlAttribute("Key") : null;
+				object key = newElement is XamlObject ? GetDictionaryKey((XamlObject)newElement) : null;
 				if (key == null || (key as string) == "")
 				{
 					if (val is Style)
@@ -182,6 +182,26 @@ namespace ICSharpCode.WpfDesign.XamlDom
 		}
 		
 		/// <summary>
+		/// The dictionary key an element is stored under: its x:Key, with a markup extension evaluated (so
+		/// <c>x:Key="{x:Static SystemColors.ControlBrushKey}"</c> is the ResourceKey and <c>{x:Type Button}</c> is the Type, as in
+		/// WPF) and the "{}" escape removed. A key that cannot be evaluated stays the literal text.
+		/// </summary>
+		internal static object GetDictionaryKey(XamlObject element)
+		{
+			string text = element.GetXamlAttribute("Key");
+			if (string.IsNullOrEmpty(text) || text[0] != '{')
+				return text;
+			if (text.StartsWith("{}", StringComparison.Ordinal))
+				return text.Substring(2);
+			try {
+				XamlObject extension = MarkupExtensionParser.Parse(text, element, null);
+				return extension.GetValueFor(null) ?? text;
+			} catch (Exception) {
+				return text;
+			}
+		}
+
+		/// <summary>
 		/// Removes an item instance from the specified collection.
 		/// </summary>
 		internal static void RemoveItem(Type collectionType, object collectionInstance, object item, XamlPropertyValue element)
@@ -190,7 +210,7 @@ namespace ICSharpCode.WpfDesign.XamlDom
 			var xamlObject = element as XamlObject;
 			
 			if (dictionary != null && xamlObject != null) {
-				dictionary.Remove(xamlObject.GetXamlAttribute("Key"));
+				dictionary.Remove(GetDictionaryKey(xamlObject));
 			} else {
 				RemoveItem(collectionType, collectionInstance, item);
 			}
