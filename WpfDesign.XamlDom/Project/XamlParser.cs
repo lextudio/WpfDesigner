@@ -190,6 +190,8 @@ namespace ICSharpCode.WpfDesign.XamlDom
 					currentXamlObject.HasErrors = true;
 				}
 			} else {
+				// Keep the original stack: "throw x;" would restart it here and hide where the load really failed.
+				System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(x).Throw();
 				throw x;
 			}
 		}
@@ -335,7 +337,11 @@ namespace ICSharpCode.WpfDesign.XamlDom
 				XamlPropertyInfo propertyInfo;
 				if (parentObj != null) {
 					propertyInfo = GetPropertyInfo(settings.TypeFinder, parentObj.Instance, parentObj.ElementType, parentElement.NamespaceURI, parentElement.LocalName);
-					collectionProperty = FindExistingXamlProperty(parentObj, propertyInfo);
+					// The element is the collection instance of the parent's property only if it fits that property. A
+					// ResourceDictionary inside <ResourceDictionary.MergedDictionaries> is an item of the collection (itself a
+					// collection, but not the property's), so its own children must not be added to the parent's property.
+					if (propertyInfo != null && propertyInfo.IsCollection && propertyInfo.ReturnType.IsAssignableFrom(obj.ElementType))
+						collectionProperty = FindExistingXamlProperty(parentObj, propertyInfo);
 				}
 				collectionInstance = obj.Instance;
 				collectionType = obj.ElementType;
