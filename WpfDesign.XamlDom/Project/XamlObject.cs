@@ -713,6 +713,10 @@ namespace ICSharpCode.WpfDesign.XamlDom
 		public override object ProvideValue()
 		{
 			var target = XamlObject.Instance as StaticResourceExtension;
+			// As StaticResourceExtension.ProvideValue: a system key resolves to the system resource itself and never
+			// looks in the element tree, even when a local dictionary defines the same key.
+			if (target.ResourceKey is ResourceKey key && key.GetType().Name == "SystemResourceKey")
+				return target.ProvideValue(null);
 			return XamlObject.ServiceProvider.Resolver.FindResource(target.ResourceKey);
 		}
 	}
