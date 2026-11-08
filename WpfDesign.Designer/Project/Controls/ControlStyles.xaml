@@ -191,7 +191,7 @@
 		<Setter Property="MinHeight" Value="0" />
 		<Setter Property="FocusVisualStyle" Value="{x:Null}" />
 		<Setter Property="Background" Value="Transparent" />
-		<Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlDarkBrushKey}}" />
+		<Setter Property="BorderBrush" Value="#FF7D8792" />
 		<Setter Property="BorderThickness" Value="1" />
 		<Setter Property="SnapsToDevicePixels" Value="True" />
 		<Setter Property="UseLayoutRounding" Value="True" />
@@ -208,12 +208,19 @@
 	<Style TargetType="{x:Type Controls:WindowClone}">
 		<Setter Property="Width" Value="640" />
 		<Setter Property="Height" Value="480" />
+		<!--
+			This is design-time window chrome, not the application's native chrome.  Do not
+			bind it to SystemColors: LibreWPF hosts do not necessarily map the Windows
+			caption resources to a distinguishable colour, which formerly made a Window
+			root look like an undifferentiated black rectangle.  Keep this neutral preview
+			frame explicit and stable across the WPF, LibreWPF and off-screen render paths.
+		-->
 		<Setter Property="Template">
 			<Setter.Value>
 				<ControlTemplate TargetType="{x:Type Controls:WindowClone}">
-					<Border Background="{DynamicResource {x:Static SystemColors.GradientActiveCaptionBrushKey}}" BorderBrush="{DynamicResource {x:Static SystemColors.WindowFrameBrushKey}}" BorderThickness="1,1,1,1">
+					<Border Background="#FFF4F6F8" BorderBrush="#FF7D8792" BorderThickness="1" SnapsToDevicePixels="True">
 						<DockPanel Margin="4,0,4,4">
-							<DockPanel Height="26" DockPanel.Dock="Top">
+							<DockPanel Height="30" DockPanel.Dock="Top" Background="#FFE7ECF1" LastChildFill="True">
 								<Image Width="16" Height="16" Margin="1,0,0,0" Source="/ICSharpCode.WpfDesign.Designer;component/Images/Icons.32x32.EmptyProjectIcon.png" Visibility="{Binding Path=(Window.Icon), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:CollapsedWhenNotNull.Instance}}" />
 								<Image Width="16" Height="16" Margin="1,0,0,0" Source="{TemplateBinding Window.Icon}" Visibility="{Binding Path=(Window.Icon), RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:CollapsedWhenZero.Instance}}" />
 								<!-- Caption glyphs are drawn as SHAPES, not font characters, deliberately.
@@ -225,23 +232,23 @@
 								     also runs on macOS and Linux through LibreWPF, where any of them would
 								     tofu exactly the same way. Three primitives need no font on any
 								     platform and cannot regress that way. -->
-								<Button Name="CloseButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Top" Width="43" Height="17" DockPanel.Dock="Right">
-									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,0.5 L 9.5,9.5 M 9.5,0.5 L 0.5,9.5" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" SnapsToDevicePixels="True" />
+								<Button Name="CloseButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Center" Width="43" Height="22" Margin="0,0,2,0" DockPanel.Dock="Right">
+									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,0.5 L 9.5,9.5 M 9.5,0.5 L 0.5,9.5" Stroke="#FF303841" StrokeThickness="1" SnapsToDevicePixels="True" />
 								</Button>
 								<!-- DockPanel.Dock="Right" places these right-to-left in DECLARATION order, so
 								     declaring close, then maximize, then minimize renders them left-to-right
 								     as minimize, maximize, close - the Windows caption order. Each glyph
 								     stays paired with the button that is named for it. -->
-								<Button Name="MaximizeButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Top" Width="25" Height="17" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}">
-									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,0.5 H 9.5 V 9.5 H 0.5 Z" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" SnapsToDevicePixels="True" />
+								<Button Name="MaximizeButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Center" Width="25" Height="22" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}">
+									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,0.5 H 9.5 V 9.5 H 0.5 Z" Stroke="#FF303841" StrokeThickness="1" SnapsToDevicePixels="True" />
 								</Button>
-								<Button Name="MinimizeButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Top" Width="25" Height="17" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}">
-									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,5.5 H 9.5" Stroke="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" StrokeThickness="1" SnapsToDevicePixels="True" />
+								<Button Name="MinimizeButton" Style="{StaticResource WindowCloneCaptionButtonStyle}" VerticalAlignment="Center" Width="25" Height="22" DockPanel.Dock="Right" Visibility="{Binding Path=(Window.ResizeMode), Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}, Converter={x:Static Converters:EnumCollapsed.Instance}, ConverterParameter=NoResize}">
+									<Path Width="10" Height="10" Stretch="None" Data="M 0.5,5.5 H 9.5" Stroke="#FF303841" StrokeThickness="1" SnapsToDevicePixels="True" />
 								</Button>
-								<Label Margin="4,0,0,0" Content="{TemplateBinding Window.Title}" />
+								<Label Margin="7,0,0,0" Padding="0" VerticalContentAlignment="Center" Foreground="#FF20262D" FontWeight="SemiBold" Content="{TemplateBinding Window.Title}" />
 							</DockPanel>
-							<Border Background="{DynamicResource {x:Static SystemColors.WindowBrushKey}}">
-								<Border ClipToBounds="True" BorderBrush="{TemplateBinding Border.BorderBrush}" BorderThickness="{TemplateBinding Border.BorderThickness}" Background="{TemplateBinding Panel.Background}">
+							<Border Background="#FFFFFFFF" BorderBrush="{TemplateBinding Border.BorderBrush}" BorderThickness="{TemplateBinding Border.BorderThickness}" SnapsToDevicePixels="True">
+								<Border ClipToBounds="True" Background="{TemplateBinding Panel.Background}">
 									<AdornerDecorator>
 										<ContentPresenter ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}" Content="{TemplateBinding ContentControl.Content}" />
 									</AdornerDecorator>
