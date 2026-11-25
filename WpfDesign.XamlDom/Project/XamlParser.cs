@@ -674,7 +674,11 @@ namespace ICSharpCode.WpfDesign.XamlDom
 			XamlPropertyValue value = null;
 
 			var valueText = attribute.Value;
-			if (valueText.StartsWith("{", StringComparison.Ordinal) && !valueText.StartsWith("{}", StringComparison.Ordinal)) {
+			if (real && obj.OwnerDocument.TypeFinder.CSharpExpressions && XamlExpressionSyntax.IsExpression(valueText)) {
+				// A C# expression (the syntax of .NET MAUI): not a markup extension, and the designer cannot evaluate it. Keep
+				// the attribute text and let the design instance stay at its default (see XamlTextValue.IsExpression).
+				value = new XamlTextValue(obj.OwnerDocument, attribute);
+			} else if (valueText.StartsWith("{", StringComparison.Ordinal) && !valueText.StartsWith("{}", StringComparison.Ordinal)) {
 				var xamlObject = MarkupExtensionParser.Parse(valueText, obj, real ? attribute : null);
 				value = xamlObject;
 			} else {

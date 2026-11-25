@@ -244,6 +244,16 @@ namespace ICSharpCode.WpfDesign.XamlDom
 
 		internal void UpdateValueOnInstance()
 		{
+			// A C# expression cannot be evaluated here: the instance keeps its default and the attribute keeps its text.
+			if (PropertyValue is XamlTextValue { IsExpression: true }) {
+				// A literal or an earlier value that was applied must not stay on the instance once the file says an expression.
+				try {
+					propertyInfo.ResetValue(parentObject.Instance);
+				} catch (Exception ex) {
+					Debug.WriteLine("UpdateValueOnInstance() could not reset for an expression - Exception:" + ex.Message);
+				}
+				return;
+			}
 			if (PropertyValue != null) {
 				try {
 					ValueOnInstance = PropertyValue.GetValueFor(propertyInfo);

@@ -79,6 +79,14 @@ namespace ICSharpCode.WpfDesign.XamlDom
 		}
 		
 		/// <summary>
+		/// True for an attribute that holds a C# expression (<see cref="XamlExpressionSyntax"/>): the text is kept as written,
+		/// but it is not a value the design instance can take, so <see cref="XamlProperty"/> does not apply it.
+		/// </summary>
+		public bool IsExpression {
+			get { return attribute != null && XamlExpressionSyntax.IsExpression(attribute.Value); }
+		}
+
+		/// <summary>
 		/// The text represented by the value.
 		/// </summary>
 		public string Text {

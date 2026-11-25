@@ -218,6 +218,11 @@ namespace ICSharpCode.WpfDesign.XamlDom
 		{
 			if (instance == null)
 				throw new ArgumentNullException("instance");
+
+			// A C# expression is the attribute text as written, never the escaped literal a plain string with a leading brace would become.
+			var expression = instance as XamlExpressionSyntax.Text;
+			if (expression != null)
+				return XamlTextValue.FromAttributeText(this, expression.Value);
 			
 			Type elementType = instance.GetType();
 			TypeConverter c = TypeDescriptor.GetConverter(instance);

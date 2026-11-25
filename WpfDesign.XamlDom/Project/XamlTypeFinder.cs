@@ -138,6 +138,34 @@ namespace ICSharpCode.WpfDesign.XamlDom
 		}
 		
 		/// <summary>
+		/// Whether an attribute value such as <c>{Items.Count}</c> that is not a known markup extension is a C# expression (the syntax of .NET MAUI,
+		/// which LibreWPF's XAML source generator accepts) rather than a markup extension. Off by default: in a plain WPF project an unprefixed
+		/// <c>{MyExtension}</c> is a markup extension of the default namespace.
+		/// </summary>
+		public bool CSharpExpressions { get; set; }
+
+		/// <summary>
+		/// Lets <paramref name="xmlNamespace"/> also find the types of a CLR namespace of <paramref name="assembly"/>, for lookup only: the
+		/// reverse mapping (which namespace the designer writes for a type) is left as it was. Used for Simpler XAML, where the types of the
+		/// project's <c>global using</c> namespaces are found in the default namespace without an <c>xmlns</c> declaration.
+		/// </summary>
+		public void AddLookupNamespace(string xmlNamespace, Assembly assembly, string clrNamespace)
+		{
+			if (xmlNamespace == null)
+				throw new ArgumentNullException("xmlNamespace");
+			if (assembly == null)
+				throw new ArgumentNullException("assembly");
+			if (string.IsNullOrEmpty(clrNamespace))
+				return;
+			XamlNamespace ns;
+			if (!namespaces.TryGetValue(xmlNamespace, out ns))
+				return;
+			var mapping = new AssemblyNamespaceMapping(assembly, clrNamespace);
+			if (!ns.ClrNamespaces.Contains(mapping))
+				ns.ClrNamespaces.Add(mapping);
+		}
+
+		/// <summary>
 		/// Gets the XML namespace that can be used for the specified assembly/namespace combination.
 		/// </summary>
 		public string GetXmlNamespaceFor(Assembly assembly, string @namespace, bool getClrNamespace = false)
@@ -315,6 +343,7 @@ namespace ICSharpCode.WpfDesign.XamlDom
 				throw new ArgumentNullException("source");
 
 			_registeredAssemblies.AddRange(source.RegisteredAssemblies);
+			CSharpExpressions = source.CSharpExpressions;
 
 			foreach (KeyValuePair<string, XamlNamespace> pair in source.namespaces) {
 				this.namespaces.Add(pair.Key, pair.Value.Clone());
